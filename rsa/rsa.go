@@ -55,8 +55,8 @@ func DecryptRSA(ctx context.Context, ciphertext []byte, privatekey []byte) (resu
 }
 
 // Generate Tls certificate
-func GenCertificate() (cert tls.Certificate, err error) {
-	rawCert, rawKey, err := GenerateCert()
+func GenCertificate(organization []string) (cert tls.Certificate, err error) {
+	rawCert, rawKey, err := GenerateCert(organization)
 	if err != nil {
 		return
 	}
@@ -96,8 +96,8 @@ func GenerateCert(organization []string) (rawCert, rawKey []byte, err error) {
 }
 
 // write certs files to storage
-func WriteCerts(ctx context.Context, path string, name string) (err error) {
-	cert, key, err := GenerateCert()
+func WriteCerts(ctx context.Context, organizaiton []string, path string, name string) (err error) {
+	cert, key, err := GenerateCert(organizaiton)
 	if err != nil {
 		glog.Line(true).Notice(ctx, err.Error())
 		return err
