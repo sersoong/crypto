@@ -2,6 +2,7 @@ package rsa
 
 import (
 	"encoding/hex"
+	"github.com/gogf/gf/v2/encoding/gbase64"
 	"github.com/gogf/gf/v2/os/gctx"
 	"testing"
 )
@@ -49,4 +50,50 @@ func TestDecryptRSA(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	t.Log(string(result))
+}
+
+func TestGenerateRSAPEMKeypair(t *testing.T) {
+	ctx := gctx.New()
+	prikey, pubkey, err := GenerateRSAPEMKeypair(ctx)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Log(string(prikey))
+	t.Log(string(pubkey))
+}
+
+func TestEncryptPEMRSA(t *testing.T) {
+	ctx := gctx.New()
+	prikey, pubkey, err := GenerateRSAPEMKeypair(ctx)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	base64Prikey := gbase64.EncodeToString(prikey)
+	t.Log(base64Prikey)
+	plaintext := "helloworld"
+	cipherText, err := EncryptPEMRSA(ctx, []byte(plaintext), pubkey)
+	base64CipherText := gbase64.EncodeToString(cipherText)
+	t.Log(base64CipherText)
+}
+
+func TestDecryptPEMRSA(t *testing.T) {
+	ctx := gctx.New()
+	prikey := "MIIEowIBAAKCAQEA4n5nII+z+92hG1r37BHIa4nOAACDcq+9O+jk6lR0ZgRwXOEItxST+RABnssKbnzeiS5S0HrpXcviyzH0bQGy/XLsY6Gj3VRVmUVif2OjeSjJUJJEfKP4fauYUukk0hJyPYHorRSbolvMYzoE9JJBUeErlCCVHGM1ap2IfO9LwhSSapGc+D6yy3ob15LAllpDJQSYwhc65asfsh9UZ8gvCx2aqdsDqNcIxdWcqAbOl7XJLBYJW97RJofMAYEq7CeJvqvnGfvbb/4ib2vxryBp6hgDC1AAZHMYSfgqZ4J5k5VJC+sNRoIrkpRumtyeIZIKE2cTKQRdcdAkCHwFqXBZ5wIDAQABAoIBAQCvXb2NmZZ64gxWuOWS8+XhVc6Zc8xTJTz4wQdVZFTHlJJHZ7muv5Ee28TVZVJLYAWR47sdTr2X8UBFogUlzZX/5Vaggcv1l9G7Hdz403YEXo8ZAldixjalXxJOx9PJj5zCgO5d7MHgQQGMpqSllQRcWGK8i0nItAvs49KFIWbf+kZgHPGMtjUYsZImKIPds8FAoH79BQ3szQFcOYW15GmyZdoe+QWwg0pyen4nIhApp5L9iloQRuJAHGuRIjWaNK119uL0f0gJ/+jgts6l6BYu6u6C8gZmTNBBN1NRNEyzmtrYJgl2wLz8Wl/b36JvpgJ9GWcAiE1r9Giky/VWbxLBAoGBAPyVnJc9rk0xawpFr5ju6VFE3KYZSfc+ivXdK5Z+1u+FPn4KnWMsB1C+Ynv4KK5fdKe3v2oBYd6iuLWdkarpt3gxPQdBu/e8Xg5o27dVVTvFvkC305QvcmjB0CjxxUADZOJBH+mVUYAMcGK+IMY/KfvfTddRhXpio7Z4O0pvOYnhAoGBAOWOeKyVthlv/XJ3UmcatPjleEBn3z66yAvMMIJydY5fZ8tRNBak/sOUDhZxQfxXRcizobCCKZc1vmkD3TklGcuQh2yGAmNIthXUH/BYvZfw+ftn/cppSIOW6Pm2j0UoPlVpebg5VZSt/BGFgfrzc41rIBG7MlBO4MUJyib7c6zHAoGAAWUqKkOy9MYzGylrYOLg8wv4VAqLuAvmZJlGJlyo/0WzJKsWV3fkynNiw+CJCP2J/WssaX98dOhdMNOf/FuyIb3T4nhge2vU8StvG0IjaGMdO+pIBueEMEPxzGgZeNML+Zv2eynR+20WKdV3BOFQcA25tljC7fwhf16GpVCb9sECgYBd/rd025yDz/J0c11fcHUX0UYrAR1NX0fYZNScJWfzUyd5/hcZCphy1uXp1JhTThz58GvNjY6gJtZ/w6BK7OEiFF0PV9QUeUptp70oOf3wADEr+0nVHsUddKaS0WjaxX64lIbNo1Rim9cyCXvOmO8AwhOQjxkr/xBUPgzzZ1TXMwKBgD6lBqDBS0L5AvK8y/G0BHOwHbtrfJHA0atUgQoSO6L2PKqdcfiO1FodOHC31oXlHwVCZT1vRZrJWfEB96C7m9kbZVIKIJoG0a3SSoMAlouTxhRvlHcd2IGzoHD4an6DeqhqhahdtoPJq6+VmFz2mQIr3dBAdweGaOuHAJ0BoALD"
+	cipherText := "LLLhau3UOTEpLyn+X36LBUSIrVnj+IDPdEVRZrGRHRHUDKltabKg6/t7uCvv9alqSPyaEypBm/GeJ0P/BPlcP2ZbKagQdPVUmOUkFhCr8oOtol6Cs79lVd16BbR8vvOPaFUdISTdJBPvOggjNNSUXn8yr4ooDMP/Y/gaU0w6jLBF3HSYKUuqfJBzvgWyygBg5j9bp1ttaX7RRzs8lBBVYG4kHm5kwSSrv3NK/onwza98xCpWpTirVncn7nyr29XGBnx5gw7TR0m2UxZDYY88/zj7to/ogyT602ND4v1uS/AUdvEBkiwlWik2fQL7FksXpXT0WCwYZ/Y+Zyuebk2ZzQ=="
+
+	rawPrikey, err := gbase64.DecodeString(prikey)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	rawCipherText, err := gbase64.DecodeString(cipherText)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	plainText, err := DecryptPEMRSA(ctx, rawCipherText, rawPrikey)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	t.Log(string(plainText))
 }

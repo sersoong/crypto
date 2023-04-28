@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gfile"
 	"github.com/gogf/gf/v2/os/glog"
@@ -30,7 +31,50 @@ func GenerateRSAKeypair(ctx context.Context) (prikey, pubkey []byte, err error) 
 	return
 }
 
-// Encrypt By RSA using []byte format key
+// Generate PEM format RSA Keypair
+func GenerateRSAPEMKeypair(ctx context.Context) (prikey, pubkey []byte, err error) {
+	prikey = nil
+	pubkey = nil
+	// generate a new keypair
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return
+	}
+
+	prikey = x509.MarshalPKCS1PrivateKey(privateKey)
+
+	// 使用 PEM 格式编码公钥
+	pubkey = pem.EncodeToMemory(&pem.Block{
+		Type:  "PUBLIC KEY",
+		Bytes: x509.MarshalPKCS1PublicKey(&privateKey.PublicKey),
+	})
+	return
+}
+
+// EncryptPEMRSA Encrypt By PEM format RSA using []byte format key
+func EncryptPEMRSA(ctx context.Context, plaintext []byte, publickey []byte) (result []byte, err error) {
+	result = nil
+	block, _ := pem.Decode(publickey)
+
+	if block == nil {
+		return nil, errors.New("failed to parse PEM block containing the public key")
+	}
+
+	pubkey, err := x509.ParsePKCS1PublicKey(block.Bytes)
+	if err != nil {
+		glog.Line(true).Notice(ctx, err.Error())
+		return
+	}
+	result, err = rsa.EncryptOAEP(sha256.New(), rand.Reader, pubkey, plaintext, nil)
+	return
+}
+
+// DecryptPEMRSA Decrypt By RSA using []byte format key
+func DecryptPEMRSA(ctx context.Context, ciphertext []byte, privatekey []byte) (result []byte, err error) {
+	return DecryptRSA(ctx, ciphertext, privatekey)
+}
+
+// EncryptRSA Encrypt By RSA using []byte format key
 func EncryptRSA(ctx context.Context, plaintext []byte, publickey []byte) (result []byte, err error) {
 	result = nil
 	pubkey, err := x509.ParsePKCS1PublicKey(publickey)
@@ -42,7 +86,7 @@ func EncryptRSA(ctx context.Context, plaintext []byte, publickey []byte) (result
 	return
 }
 
-// Decrypt By RSA using []byte format key
+// DecryptRSA Decrypt By RSA using []byte format key
 func DecryptRSA(ctx context.Context, ciphertext []byte, privatekey []byte) (result []byte, err error) {
 	result = nil
 	prikey, err := x509.ParsePKCS1PrivateKey(privatekey)
