@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -48,6 +47,7 @@ func GenerateRSAPEMKeypair(ctx context.Context) (prikey, pubkey []byte, err erro
 		Type:  "PUBLIC KEY",
 		Bytes: x509.MarshalPKCS1PublicKey(&privateKey.PublicKey),
 	})
+	//pubkey = []byte(gstr.Replace(string(genPubkey), "\n", ""))
 	return
 }
 
@@ -65,7 +65,7 @@ func EncryptPEMRSA(ctx context.Context, plaintext []byte, publickey []byte) (res
 		glog.Line(true).Notice(ctx, err.Error())
 		return
 	}
-	result, err = rsa.EncryptOAEP(sha256.New(), rand.Reader, pubkey, plaintext, nil)
+	result, err = rsa.EncryptPKCS1v15(rand.Reader, pubkey, plaintext)
 	return
 }
 
@@ -82,7 +82,8 @@ func EncryptRSA(ctx context.Context, plaintext []byte, publickey []byte) (result
 		glog.Line(true).Notice(ctx, err.Error())
 		return
 	}
-	result, err = rsa.EncryptOAEP(sha256.New(), rand.Reader, pubkey, plaintext, nil)
+	result, err = rsa.EncryptPKCS1v15(rand.Reader, pubkey, plaintext)
+	//result, err = rsa.EncryptOAEP(sha256.New(), rand.Reader, pubkey, plaintext, nil)
 	return
 }
 
@@ -94,7 +95,8 @@ func DecryptRSA(ctx context.Context, ciphertext []byte, privatekey []byte) (resu
 		glog.Line(true).Notice(ctx, err.Error())
 		return
 	}
-	result, err = rsa.DecryptOAEP(sha256.New(), rand.Reader, prikey, ciphertext, nil)
+	result, err = rsa.DecryptPKCS1v15(rand.Reader, prikey, ciphertext)
+	//result, err = rsa.DecryptOAEP(sha256.New(), rand.Reader, prikey, ciphertext, nil)
 	return
 }
 
